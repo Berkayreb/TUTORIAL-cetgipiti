@@ -1,0 +1,6 @@
+@cetgipiti.Server_HostAddress = http://localhost:5219
+
+GET {{cetgipiti.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
