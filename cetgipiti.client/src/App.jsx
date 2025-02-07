@@ -38,7 +38,7 @@ function App() {
             }}
         >
             <Typography variant='h6' sx={{ textAlign: 'center', mb: 1 }}>
-                CetGIPITI
+                Ã‡etGÄ°PÄ°TÄ°
             </Typography>
             <List sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 420 }}>
                 {messages.map((msg, index) => (
@@ -77,7 +77,7 @@ function App() {
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyPress={e => e.key === 'Enter' && handleSendMessage()}
-                    placeholder='Yardýmcý olabileceðim bir konu varmýydý?'
+                    placeholder='YardÄ±mcÄ± olabileceÄŸim bir konu varmÄ±ydÄ±?'
                 />
                 <IconButton color='primary' onClick={handleSendMessage} sx={{ ml: 1 }}>
                     <SendIcon/>
