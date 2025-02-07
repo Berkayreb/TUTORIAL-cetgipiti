@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     Box,
     TextField,
@@ -11,18 +11,51 @@ import {
 } from '@mui/material';
 import './App.css';
 import SendIcon from '@mui/icons-material/Send';
+import axios from 'axios';
+
 function App() {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
+    const [isThinking, setIsThinking] = useState(false);
+    const messagesEndRef = useRef(null); // Ref oluştur
 
-    const handleSendMessage = () => {
+    // Scroll'u en aşağı kaydır
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Mesajlar güncellendiğinde scrollToBottom çağrılacak
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const handleSendMessage = async () => {
         if (input.trim()) {
-            setMessages([
-                ...messages,
+            setMessages(prevMessages => [
+                ...prevMessages,
                 { text: input, sender: 'You' },
-                { text: 'This is a response from ChatGPT!', sender: 'ChatGPT' },
+                { text: 'Düşünüyor...', sender: 'ÇetGİPİTİ' }
             ]);
+
+            setIsThinking(true);
             setInput('');
+
+            try {
+                const response = await axios.post('http://localhost:5219/api/message/ask', { messageRequest: input });
+
+                setMessages(prevMessages => {
+                    const updatedMessages = [...prevMessages];
+                    updatedMessages[updatedMessages.length - 1] = {
+                        text: response.data.response.messageResponse.replace(/<think>|<\/think>/g, '').trim(),
+                        sender: 'ÇetGİPİTİ'
+                    };
+                    return updatedMessages;
+                });
+            } catch (error) {
+                console.error('Hata:', error);
+            } finally {
+                setIsThinking(false);
+            }
         }
     };
 
@@ -40,7 +73,7 @@ function App() {
             <Typography variant='h6' sx={{ textAlign: 'center', mb: 1 }}>
                 ÇetGİPİTİ
             </Typography>
-            <List sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 420 }}>
+            <List sx={{ flexGrow: 1, overflowY: 'auto', maxHeight: 750 }}>
                 {messages.map((msg, index) => (
                     <ListItem
                         key={index}
@@ -60,6 +93,7 @@ function App() {
                         />
                     </ListItem>
                 ))}
+                <div ref={messagesEndRef} /> {/* Scroll'un ineceği nokta */}
             </List>
             <Box
                 sx={{
@@ -77,15 +111,15 @@ function App() {
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyPress={e => e.key === 'Enter' && handleSendMessage()}
-                    placeholder='Yardımcı olabileceğim bir konu varmıydı?'
+                    placeholder={isThinking ? 'Düşünüyor...' : 'Yardımcı olabileceğim bir konu varmıydı?'}
+                    disabled={isThinking}
                 />
-                <IconButton color='primary' onClick={handleSendMessage} sx={{ ml: 1 }}>
-                    <SendIcon/>
+                <IconButton color='primary' onClick={handleSendMessage} sx={{ ml: 1 }} disabled={isThinking}>
+                    <SendIcon />
                 </IconButton>
             </Box>
         </Paper>
     );
-    
 }
 
 export default App;
