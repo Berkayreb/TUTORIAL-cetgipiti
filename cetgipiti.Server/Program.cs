@@ -1,10 +1,18 @@
 using cetgipiti.Server.Services.Abstract;
 using cetgipiti.Server.Services.Concrete;
+using Codeblaze.SemanticKernel.Connectors.Ollama;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.SemanticKernel;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton(sp =>
+{
+    var kernelBuilder = Kernel.CreateBuilder().AddOllamaChatCompletion("deepseek-r1:1.5b", "http://localhost:11434");
+    return kernelBuilder.Build();
+});
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
